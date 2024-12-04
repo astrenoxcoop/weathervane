@@ -1,0 +1,20 @@
+{% extends "base.en-us.html" %}
+{% block title %}WeatherVane{% endblock %}
+{% block content %}
+<main>
+  <hgroup>
+    <h1><a href="/">Weather Vane</a></h1>
+    <p>An ATProtocol identity validation and verification tool.</p>
+  </hgroup>
+  <section>
+    <h2>{{ did }}</h2>
+    {% if identities %}
+      <ul hx-ext="sse" sse-connect="/did/{{ did }}/updates" sse-close="done">
+      {% for identity in identities %}
+        <li sse-swap="identity-{{ identity.key }}"><span aria-busy="true">{{ identity.value }}</span></li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

@@ -1,0 +1,48 @@
+[package]
+name = "weathervane"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = ["reload"]
+embed = ["dep:minijinja-embed"]
+reload = ["dep:minijinja-autoreload", "minijinja/loader"]
+
+[build-dependencies]
+minijinja-embed = {version = "2.2.0"}
+
+[dependencies]
+anyhow = "1.0.88"
+async-trait = "0.1.82"
+axum-extra = { version = "0.9.4", features = ["query"] }
+axum = { version = "0.7.5", features = ["http2", "macros"] }
+axum-template = { version = "2.4.0", features = ["minijinja-autoreload", "minijinja"] }
+base64 = "0.22.1"
+chrono-tz = "0.10.0"
+chrono = { version = "0.4.38", default-features = false, features = ["std", "alloc", "now", "serde"] }
+futures-util = { version = "0.3.31", features = ["sink"] }
+headers = "0.4.0"
+http = "1.1.0"
+serde_json = { version = "1.0.132", features = ["alloc"] }
+serde = { version = "1.0.214", features = ["alloc", "derive"] }
+thiserror = "1.0.63"
+tokio-util = { version = "0.7.12", features = ["net", "rt", "tracing"] }
+tokio = { version = "1.41.0", features = ["bytes", "macros", "net", "rt", "rt-multi-thread", "signal", "sync"] }
+tower-http = { version = "0.5.2", features = ["cors", "fs", "timeout", "trace", "tracing"] }
+tower = { version = "0.5.1", features = ["limit", "timeout", "tokio", "tracing"] }
+tracing-subscriber = { version = "0.3.18", features = ["env-filter", "chrono", "json"] }
+tracing = { version = "0.1.40", features = ["async-await", "log", "valuable"] }
+reqwest = { version = "0.12.9", features = ["json", "zstd", "rustls-tls"] }
+duration-str = "0.11.2"
+scraper = "0.21.0"
+minijinja = { version = "2.2.0", features = ["builtins", "json", "urlencode"] }
+minijinja-autoreload = { version = "2.2.0", optional = true }
+minijinja-embed = { version = "2.2.0", optional = true }
+axum-htmx = { version = "0.6.0", features = ["auto-vary"] }
+hickory-resolver = { version = "0.24.1", features = ["dns-over-https-rustls", "dns-over-rustls", "rustls", "tokio-rustls"] }
+cityhasher = "0.1.0"
+rand = "0.8.5"
+async-stream = "0.3.6"
+tokio-stream = "0.1.16"
+moka = { version = "0.12.8", features = ["future"] }
+url = "2.5.4"

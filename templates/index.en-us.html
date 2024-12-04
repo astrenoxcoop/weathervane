@@ -1,0 +1,180 @@
+{% extends "base.en-us.html" %}
+{% block title %}WeatherVane{% endblock %}
+{% block content %}
+<main>
+  <hgroup>
+    <h1>Weather Vane</h1>
+    <p>An ATProtocol identity validation and verification tool.</p>
+  </hgroup>
+  <section>
+    {% include 'partial_validate.en-us.html' %}
+
+    <h1>About</h1>
+    <p>Weather Vane uses the currently supported <kbd>alsoKnownAs</kbd> property of did-method-plc and did-method-web documents and performs bi-directional verification.</p>
+    <p>Examples:</p>
+    <ul>
+      <li><a href="/did/did:plc:cbkjy5n7bk3ax2wplmtjofq2">did:plc:cbkjy5n7bk3ax2wplmtjofq2</a></li>
+    </ul>
+
+    <h1>Frequently Asked Questions</h1>
+    <h2>Is this a verification service?</h2>
+    <p>No! This is a tool that can be used to verify the <strong>alsoKnownAs</strong> content of a DID document.</p>
+    <p>Verification systems that centralize authority <u>are problematic</u>. They may have good intentions, but they remove people's autonomy and force centralization of identity and authority in a way that is antithetical to the ATMosphere.</p>
+
+    <h2>Can I use this to showcase my identities?</h2>
+    <p>This is a reference implementation, so I wouldn't suggest it.</p>
+
+    <h1>Supported Identities</h1>
+    <p class="pico-color-red-500"><strong>Proceed With Caution!</strong> Updating your DID document comes with risk and you should be very careful when doing so.</p>
+
+    <h2>Handle</h2>
+    <p>Handles are the most common ATprotocol identity type and are used to reference identities throughout the ATMosphere.</p>
+    <p>Example: <kbd>at://ngerakines.me</kbd></p>
+
+    <p>To append, not replace, a handle, craft a handle URI in the format of <kbd>"at://" + handle</kbd> and add it to the <kbd>alsoKnownAs</kbd> array in your DID document.</p>
+    <p>Additionally, you must create a TXT DNS record at <kbd>"_atproto." + handle</kbd> with the value of <kbd>"did=" + DID</kbd>.</p>
+
+    <pre><code>$ dig _atproto.ngerakines.me TXT +noall +answer
+_atproto.ngerakines.me. 2718    IN      TXT     "did=did:plc:cbkjy5n7bk3ax2wplmtjofq2"</code></pre>
+
+    <h2>Domains</h2>
+    <p>Domains can be verified but this is different than the formal relationship of a handle identity</p>
+    <p>Example: <kbd>ngerakines.me.</kbd></p>
+
+    <p>To add a domain, add the <a href="https://en.wikipedia.org/wiki/Fully_qualified_domain_name">fully qualified domain name</a> to the <kbd>alsoKnownAs</kbd> array in your DID document.</p>
+    <p>Additionally, you must create a TXT DNS with the value of <kbd>"did=" + DID</kbd>.</p>
+
+    <pre><code>$ dig ngerakines.me TXT +noall +answer
+ngerakines.me. 2718    IN      TXT     "did=did:plc:cbkjy5n7bk3ax2wplmtjofq2"</code></pre>
+
+    <h2>GitHub</h2>
+    <p>GitHub identities can be verified through a multi-step verification process that inolves retreiving the "social identities" through the GitHub API and resolving the handle to your DID.</p>
+    <p>Example: <kbd>https://github.com/ngerakines</kbd></p>
+
+    <p>To add a GitHub identity, add the "Bluesky" social identity to your profile with a bsky.app URL for a profile that resolves to your DID.</p>
+
+    <pre><code>$ curl -L \      
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/users/ngerakines/social_accounts
+[
+  {
+    "provider": "bluesky",
+    "url": "https://bsky.app/profile/ngerakines.me"
+  }
+]</code></pre>
+
+    <p>Then, append the GitHub URL to the <kbd>alsoKnownAs</kbd> array in your DID document.</p>
+
+
+
+    <h2>Website</h2>
+    <p>Website identities can be verified through a multi-step verification process through a GET request to the URL and looking for a <kbd>link</kbd> element that references the DID.</p>
+    <p>Example: <kbd>https://ngerakines.me/</kbd></p>
+
+    <p>Add the URL to the <kbd>alsoKnownAs</kbd> array in your DID document.</p>
+    <p>The content returned by a GET request for the URL must include at least one (1) <kbd>link</kbd> element with a <kbd>rel</kbd> attribute of <kbd>"did"</kbd> and a <kbd>href</kbd> attribute that matches your DID.</p>
+    <pre><code>&lt;link rel="did" href="did:plc:cbkjy5n7bk3ax2wplmtjofq2" &gt;</code></pre>
+
+
+    <p class="pico-color-red-500"><strong>Warning!</strong> This URL must use the https schema, cannot have any authentication, must be a resolving hostname, cannot use alternative ports, and may not have query string parameters. The page will not be rendered and Javascript will not be evaluated. The page must return a response within 3 seconds.</p>
+
+    <h1>Using Goat</h1>
+    <p>Goat supports PLC operations and can be used to add identities, like the ones above, to your DID document.</p>
+    <p><a href="https://github.com/bluesky-social/indigo/tree/main/cmd/goat">https://github.com/bluesky-social/indigo/tree/main/cmd/goat</a></p>
+
+    <p><strong>First</strong>, download and authenticate with Goat. <span class="pico-color-red-500"><strong>Red Flag!</strong> You must use your actual PDS password.<span></p>
+    <pre><code>$ goat account login --username you.example.com --password your-actual-password</code></pre>
+
+    <p><strong>Next</strong>, download a copy of your DID document as the file <em>did.json</em>. Through the goat tool, you can see what it recommends as your DID document.</p>
+    <pre><code>$ goat account plc recommended
+{
+  "alsoKnownAs": [
+    "at://ngerakines.me"
+  ],
+  "verificationMethods": {
+    "atproto": "did:key:zQ3shXvCK2RyPrSLYQjBEw5CExZkUhJH3n1K2Mb9sC7JbvRMF"
+  },
+  "rotationKeys": [
+    "did:key:zQ3shSgMaSd8PmZDy63CvjixESX8Ef6nKumUg9gWUry764SC8"
+  ],
+  "services": {
+    "atproto_pds": {
+      "type": "AtprotoPersonalDataServer",
+      "endpoint": "https://pds.cauda.cloud"
+    }
+  }
+}</code></pre>
+    <p>Alternatively, wget can be used</p>
+    <pre><code>$ wget -O did.json https://plc.directory/did:plc:decafbad123456780/data</code></pre>
+
+    <p><strong>Next</strong>, add your identities to the <kbd>alsoKnownAs</kbd> array.</p>
+    <pre><code>{
+  "alsoKnownAs": [
+    "at://ngerakines.me"
+    "at://nick.gerakines.net",
+    "at://nick.thegem.city",
+    "https://github.com/ngerakines",
+    "https://ngerakines.me/",
+    "ngerakines.me."
+  ],
+  "verificationMethods": {
+    "atproto": "did:key:zQ3shXvCK2RyPrSLYQjBEw5CExZkUhJH3n1K2Mb9sC7JbvRMF"
+  },
+  "rotationKeys": [
+    "did:key:zQ3shSgMaSd8PmZDy63CvjixESX8Ef6nKumUg9gWUry764SC8"
+  ],
+  "services": {
+    "atproto_pds": {
+      "type": "AtprotoPersonalDataServer",
+      "endpoint": "https://pds.cauda.cloud"
+    }
+  }
+}</code></pre>
+
+    <p><strong>Next</strong>, use goat to request a token from your PDS. Check your email for the token and prepare to use it in then next step.</p>
+    <pre><code>$ goat account plc request-token</code></pre>
+    <p class="pico-color-red-500"><strong>Warning!</strong> As stated previously, updating your DID document manually is very risky. You probably shouldn't be doing this.</p>
+
+    <p><strong>Next</strong>, use goat to sign the document using the token.</p>
+    <pre><code>$ goat account plc sign --token ABCDE-12345 ./did.json</code></pre>
+    <p>Save the output as the file "did-signed.json".</p>
+
+    <p><strong>Finally</strong>, use goat to submit the signed DID document to and through your PDS to PLC.</p>
+    <pre><code>$ goat account plc submit ./did-signed.json</code></pre>
+
+    <p>That's it! You've updated your DID document.</p>
+    <pre><code>{
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://w3id.org/security/multikey/v1",
+    "https://w3id.org/security/suites/secp256k1-2019/v1"
+  ],
+  "alsoKnownAs": [
+    "at://ngerakines.me",
+    "at://nick.gerakines.net",
+    "at://nick.thegem.city",
+    "https://github.com/ngerakines",
+    "https://ngerakines.me/",
+    "ngerakines.me."
+  ],
+  "id": "did:plc:cbkjy5n7bk3ax2wplmtjofq2",
+  "service": [
+    {
+      "id": "#atproto_pds",
+      "serviceEndpoint": "https://pds.cauda.cloud",
+      "type": "AtprotoPersonalDataServer"
+    }
+  ],
+  "verificationMethod": [
+    {
+      "controller": "did:plc:cbkjy5n7bk3ax2wplmtjofq2",
+      "id": "did:plc:cbkjy5n7bk3ax2wplmtjofq2#atproto",
+      "publicKeyMultibase": "zQ3shXvCK2RyPrSLYQjBEw5CExZkUhJH3n1K2Mb9sC7JbvRMF",
+      "type": "Multikey"
+    }
+  ]
+}</code></pre>
+  </section>
+</main>
+{% endblock %}

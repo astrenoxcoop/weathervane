@@ -1,0 +1,10 @@
+<form hx-post="/validate" hx-swap="outerHTML settle:1s">
+  <fieldset>
+    <label for="subject">DID</label>
+    <input type="search" id="subject" name="subject" data-loading-disable {% if subject_value %} value="{{ subject_value }}" {% else %} placeholder="did:plc:1234567890abcdef" {% endif %}{% if subject_error %} aria-invalid="true" aria-describedby="subject-error"{% endif %}>
+    {% if subject_error %}
+    <small id="subject-error">{{ subject_error }}</small>
+    {% endif %}
+  </fieldset>
+  <button data-loading-disable data-loading-aria-busy>Verify</button>
+</form>
