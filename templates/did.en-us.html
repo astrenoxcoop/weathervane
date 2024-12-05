@@ -8,13 +8,24 @@
   </hgroup>
   <section>
     <h2>{{ did }}</h2>
+    <p class="pico-color-blue-600">Examine all claims carefully and exercise caution. <a class="pico-color-blue-600" target="_blank" href="https://pausetake9.org/">https://pausetake9.org/</a></p>
     {% if identities %}
       <ul hx-ext="sse" sse-connect="/did/{{ did }}/updates" sse-close="done">
       {% for identity in identities %}
-        <li sse-swap="identity-{{ identity.key }}"><span aria-busy="true">{{ identity.value }}</span></li>
+        <li sse-swap="identity-{{ identity.key }}"><span aria-busy="true">&#9744; {{ identity.value }}</span></li>
       {% endfor %}
       </ul>
+    {% else %}
+    <p>The identifier has no identities associated with it.</p>
     {% endif %}
+    <h3>Help</h3>
+    <p>How to read identity verification status:</p>
+    <ul>
+      <li class="pico-color-green-600">"&#9745;" - the identity has been verified.</li>
+      <li class="pico-color-red-600">"&#9746;" - the identity has <strong>not</strong> been verified.</li>
+      <li>"&#9744;" - the identity is being processed.</li>
+    </ul>
+    <p>Verification is <strong><em>bi-directional</em></strong>. Meaning if your DID document includes a link to an identity, the identity needs to link back or reference the DID.</p>
   </section>
 </main>
 {% endblock %}

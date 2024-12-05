@@ -10,171 +10,66 @@
     {% include 'partial_validate.en-us.html' %}
 
     <h1>About</h1>
-    <p>Weather Vane uses the currently supported <kbd>alsoKnownAs</kbd> property of did-method-plc and did-method-web documents and performs bi-directional verification.</p>
-    <p>Examples:</p>
-    <ul>
-      <li><a href="/did/did:plc:cbkjy5n7bk3ax2wplmtjofq2">did:plc:cbkjy5n7bk3ax2wplmtjofq2</a></li>
-    </ul>
+    <p>Weather Vane is a tool that can be used to verify identities and links contained in did-method-plc and did-method-web documents. It performs bi-directional verification to ensure that claims are accurate and trustworthy.</p>
+    <p>Example: <a href="/did/did:plc:cbkjy5n7bk3ax2wplmtjofq2">did:plc:cbkjy5n7bk3ax2wplmtjofq2</a></p>
 
-    <h1>Frequently Asked Questions</h1>
-    <h2>Is this a verification service?</h2>
-    <p>No! This is a tool that can be used to verify the <strong>alsoKnownAs</strong> content of a DID document.</p>
-    <p>Verification systems that centralize authority <u>are problematic</u>. They may have good intentions, but they remove people's autonomy and force centralization of identity and authority in a way that is antithetical to the ATMosphere.</p>
+    <h3>Help</h3>
+    <p>Here are some of the frequently asked questions about Weather Vane.</p>
 
-    <h2>Can I use this to showcase my identities?</h2>
-    <p>This is a reference implementation, so I wouldn't suggest it.</p>
+    <h4>How can I use it?</h4>
+    <p>Using the form at the top of the page, enter the ATProtocol handle or <abbr title="Decentralized Identifier">DID</abbr> that you would like to verify, and submit the form.</p>
+    <p>All of the identities associated with the account will be listed along with their verification status.</p>
 
-    <h1>Supported Identities</h1>
-    <p class="pico-color-red-500"><strong>Proceed With Caution!</strong> Updating your DID document comes with risk and you should be very careful when doing so.</p>
+    <h4>How does it work?</h4>
+    <p>In Bluesky, and as a part of the larger ATProtocol ecosystem, you have a <abbr title="Decentralized Identifier">DID</abbr> that is used to help servers understand where to send requests to. The <a href="https://www.w3.org/TR/did-core/">did-core</a> technical specification for how DIDs work includes the ability to link identities with the <kbd>alsoKnownAs</kbd> attribute.</p>
+    <p>Weather Vane reads this information and performs bi-directional verification of the linked identities described in DID documents.</p>
 
-    <h2>Handle</h2>
-    <p>Handles are the most common ATprotocol identity type and are used to reference identities throughout the ATMosphere.</p>
-    <p>Example: <kbd>at://ngerakines.me</kbd></p>
+    <h4>What is bi-directional verification?</h4>
+    <p>Bi-directional verification is the process of verifying that a DID document contains a reference to an identity and that the identity contains a reference to the DID document.</p>
+    <p>For example, if a DID document contains a reference to a website, the HTML served when you visit the page must contain a reference to the DID document in the form of an element like <code>&lt;link rel="did" href="did:plc:decafbad"&gt;</code>.</p>
 
-    <p>To append, not replace, a handle, craft a handle URI in the format of <kbd>"at://" + handle</kbd> and add it to the <kbd>alsoKnownAs</kbd> array in your DID document.</p>
-    <p>Additionally, you must create a TXT DNS record at <kbd>"_atproto." + handle</kbd> with the value of <kbd>"did=" + DID</kbd>.</p>
+    <p><strong>Why is this important?</strong> Bi-directional verification shows mutual consent and control.</p>
+    <p>For example, let's say that you are <u>@johnny-awesome-handle</u> and blog at <u>https://the-greatest.of-all-time/</u>.
+    <p>
+      By including the URL of your blog in your DID document, you are proving that you are the account holder of the handle <u>@johnny-awesome-handle</u>.
+      By creating a DNS record on the domain that points back to your DID, you are proving that you have control over the domain.
+    </p>
+    <p>
+      Those mutual controls represent bi-directional verification because you need access to and control over both the account and domain to configure them to point to each other. If someone didn't have access and control over the domain or website, they wouldn't be able to create the necessary records to point back to their DID.
+    </p>
 
-    <pre><code>$ dig _atproto.ngerakines.me TXT +noall +answer
-_atproto.ngerakines.me. 2718    IN      TXT     "did=did:plc:cbkjy5n7bk3ax2wplmtjofq2"</code></pre>
+    <h4>How can I verify it manually?</h4>
+    <p>Verifying the identities referenced by a DID document can be time consuming, but it is possible to do so manually.</p>
+    <ol>
+      <li>
+        <p>First, resolve the identifier to the DID document.</p>
+        <ul>
+          <li>For did-method-plc DIDs, you can look them up on <a href="https://plc.directory/">plc.directory</a>.</li>
+          <li>For did-method-web DIDs, you'll need to make an HTTP GET request to the expanded DID json document per the spec.</li>
+        </ul>
+      </li>
+      <li>
+        <p>Enumerate the <kbd>alsoKnownAs</kbd> array in the DID document and verify each</p>
+        <ul>
+          <li>did-method-web identities can be resolved as per their spec.</li>
+          <li>did-method-plc identities can be resolved as per their spec.</li>
+          <li><abbr title="Fully-Qualified Domain Name">FQDN</abbr> identities can be resolved by a TXT query to the value</li>
+          <li>GitHub identities can be resolved through an API call to the user social identities API endpoint and further resolution of the "bluesky" URL.</li>
+          <li>Websites can be verified by making a HTTP GET request to the URL and verifying the presense of a <code>link</code> element with a <code>rel</code> attribute of <code>"did"</code> and a <code>href</code> attribute that matches the DID.</li>
+        </ul>
+      </li>
+    </ol>
 
-    <h2>Domains</h2>
-    <p>Domains can be verified but this is different than the formal relationship of a handle identity</p>
-    <p>Example: <kbd>ngerakines.me.</kbd></p>
+    <h4>Why use this instead of a labeler</h4>
+    <p>Label services can be appealing because of the instant gratification they provide, but they are not a good solution for verifying identities and cause active harm.</p>
+    <ol>
+      <li>They centralized identity and authority, which is antithentical to ATProtocol.</li>
+      <li>They remove your autonomy and control, by forcing you to rely on a third party that you have no long-term control.</li>
+    </ol>
 
-    <p>To add a domain, add the <a href="https://en.wikipedia.org/wiki/Fully_qualified_domain_name">fully qualified domain name</a> to the <kbd>alsoKnownAs</kbd> array in your DID document.</p>
-    <p>Additionally, you must create a TXT DNS with the value of <kbd>"did=" + DID</kbd>.</p>
-
-    <pre><code>$ dig ngerakines.me TXT +noall +answer
-ngerakines.me. 2718    IN      TXT     "did=did:plc:cbkjy5n7bk3ax2wplmtjofq2"</code></pre>
-
-    <h2>GitHub</h2>
-    <p>GitHub identities can be verified through a multi-step verification process that inolves retreiving the "social identities" through the GitHub API and resolving the handle to your DID.</p>
-    <p>Example: <kbd>https://github.com/ngerakines</kbd></p>
-
-    <p>To add a GitHub identity, add the "Bluesky" social identity to your profile with a bsky.app URL for a profile that resolves to your DID.</p>
-
-    <pre><code>$ curl -L \      
-  -H "Accept: application/vnd.github+json" \
-  -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/users/ngerakines/social_accounts
-[
-  {
-    "provider": "bluesky",
-    "url": "https://bsky.app/profile/ngerakines.me"
-  }
-]</code></pre>
-
-    <p>Then, append the GitHub URL to the <kbd>alsoKnownAs</kbd> array in your DID document.</p>
-
-
-
-    <h2>Website</h2>
-    <p>Website identities can be verified through a multi-step verification process through a GET request to the URL and looking for a <kbd>link</kbd> element that references the DID.</p>
-    <p>Example: <kbd>https://ngerakines.me/</kbd></p>
-
-    <p>Add the URL to the <kbd>alsoKnownAs</kbd> array in your DID document.</p>
-    <p>The content returned by a GET request for the URL must include at least one (1) <kbd>link</kbd> element with a <kbd>rel</kbd> attribute of <kbd>"did"</kbd> and a <kbd>href</kbd> attribute that matches your DID.</p>
-    <pre><code>&lt;link rel="did" href="did:plc:cbkjy5n7bk3ax2wplmtjofq2" &gt;</code></pre>
-
-
-    <p class="pico-color-red-500"><strong>Warning!</strong> This URL must use the https schema, cannot have any authentication, must be a resolving hostname, cannot use alternative ports, and may not have query string parameters. The page will not be rendered and Javascript will not be evaluated. The page must return a response within 3 seconds.</p>
-
-    <h1>Using Goat</h1>
-    <p>Goat supports PLC operations and can be used to add identities, like the ones above, to your DID document.</p>
-    <p><a href="https://github.com/bluesky-social/indigo/tree/main/cmd/goat">https://github.com/bluesky-social/indigo/tree/main/cmd/goat</a></p>
-
-    <p><strong>First</strong>, download and authenticate with Goat. <span class="pico-color-red-500"><strong>Red Flag!</strong> You must use your actual PDS password.<span></p>
-    <pre><code>$ goat account login --username you.example.com --password your-actual-password</code></pre>
-
-    <p><strong>Next</strong>, download a copy of your DID document as the file <em>did.json</em>. Through the goat tool, you can see what it recommends as your DID document.</p>
-    <pre><code>$ goat account plc recommended
-{
-  "alsoKnownAs": [
-    "at://ngerakines.me"
-  ],
-  "verificationMethods": {
-    "atproto": "did:key:zQ3shXvCK2RyPrSLYQjBEw5CExZkUhJH3n1K2Mb9sC7JbvRMF"
-  },
-  "rotationKeys": [
-    "did:key:zQ3shSgMaSd8PmZDy63CvjixESX8Ef6nKumUg9gWUry764SC8"
-  ],
-  "services": {
-    "atproto_pds": {
-      "type": "AtprotoPersonalDataServer",
-      "endpoint": "https://pds.cauda.cloud"
-    }
-  }
-}</code></pre>
-    <p>Alternatively, wget can be used</p>
-    <pre><code>$ wget -O did.json https://plc.directory/did:plc:decafbad123456780/data</code></pre>
-
-    <p><strong>Next</strong>, add your identities to the <kbd>alsoKnownAs</kbd> array.</p>
-    <pre><code>{
-  "alsoKnownAs": [
-    "at://ngerakines.me"
-    "at://nick.gerakines.net",
-    "at://nick.thegem.city",
-    "https://github.com/ngerakines",
-    "https://ngerakines.me/",
-    "ngerakines.me."
-  ],
-  "verificationMethods": {
-    "atproto": "did:key:zQ3shXvCK2RyPrSLYQjBEw5CExZkUhJH3n1K2Mb9sC7JbvRMF"
-  },
-  "rotationKeys": [
-    "did:key:zQ3shSgMaSd8PmZDy63CvjixESX8Ef6nKumUg9gWUry764SC8"
-  ],
-  "services": {
-    "atproto_pds": {
-      "type": "AtprotoPersonalDataServer",
-      "endpoint": "https://pds.cauda.cloud"
-    }
-  }
-}</code></pre>
-
-    <p><strong>Next</strong>, use goat to request a token from your PDS. Check your email for the token and prepare to use it in then next step.</p>
-    <pre><code>$ goat account plc request-token</code></pre>
-    <p class="pico-color-red-500"><strong>Warning!</strong> As stated previously, updating your DID document manually is very risky. You probably shouldn't be doing this.</p>
-
-    <p><strong>Next</strong>, use goat to sign the document using the token.</p>
-    <pre><code>$ goat account plc sign --token ABCDE-12345 ./did.json</code></pre>
-    <p>Save the output as the file "did-signed.json".</p>
-
-    <p><strong>Finally</strong>, use goat to submit the signed DID document to and through your PDS to PLC.</p>
-    <pre><code>$ goat account plc submit ./did-signed.json</code></pre>
-
-    <p>That's it! You've updated your DID document.</p>
-    <pre><code>{
-  "@context": [
-    "https://www.w3.org/ns/did/v1",
-    "https://w3id.org/security/multikey/v1",
-    "https://w3id.org/security/suites/secp256k1-2019/v1"
-  ],
-  "alsoKnownAs": [
-    "at://ngerakines.me",
-    "at://nick.gerakines.net",
-    "at://nick.thegem.city",
-    "https://github.com/ngerakines",
-    "https://ngerakines.me/",
-    "ngerakines.me."
-  ],
-  "id": "did:plc:cbkjy5n7bk3ax2wplmtjofq2",
-  "service": [
-    {
-      "id": "#atproto_pds",
-      "serviceEndpoint": "https://pds.cauda.cloud",
-      "type": "AtprotoPersonalDataServer"
-    }
-  ],
-  "verificationMethod": [
-    {
-      "controller": "did:plc:cbkjy5n7bk3ax2wplmtjofq2",
-      "id": "did:plc:cbkjy5n7bk3ax2wplmtjofq2#atproto",
-      "publicKeyMultibase": "zQ3shXvCK2RyPrSLYQjBEw5CExZkUhJH3n1K2Mb9sC7JbvRMF",
-      "type": "Multikey"
-    }
-  ]
-}</code></pre>
+    <h4>How can I add my identities to my account?</h4>
+    <p>Adding identities to your account is a multi-step process that involves updating your DID document and verifying the identities.</p>
+    <p>Visit <a href="/guide">/guide</a> for instructions.</p>
   </section>
 </main>
 {% endblock %}

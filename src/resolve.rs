@@ -51,7 +51,7 @@ pub async fn resolve_handle_http(http_client: &reqwest::Client, handle: &str) ->
         .map_err(|err| err.into())
         .and_then(|body| {
             if body.starts_with("did:") {
-                Ok(body.to_string())
+                Ok(body.trim().to_string())
             } else {
                 Err(anyhow!("Invalid response from {}", lookup_url))
             }

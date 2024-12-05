@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use ordermap::OrderSet;
 
 use crate::did::is_valid_hostname;
 
@@ -39,7 +39,7 @@ impl IdentityType {
     }
 }
 
-pub(crate) fn parse_identities(values: &[String]) -> HashSet<IdentityType> {
+pub(crate) fn parse_identities(values: &[String]) -> OrderSet<IdentityType> {
     values.iter().map(|value| parse_identity(value)).collect()
 }
 

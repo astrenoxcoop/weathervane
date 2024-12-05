@@ -1733,6 +1733,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ordermap"
+version = "0.5.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f80a48eb68b6a7da9829b8b0429011708f775af80676a91063d023a66a656106"
+dependencies = [
+ "indexmap",
+]
+
+[[package]]
 name = "overload"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3185,7 +3194,7 @@ checksum = "6ee99da9c5ba11bd675621338ef6fa52296b76b83305e9b6e5c77d4c286d6d49"
 
 [[package]]
 name = "weathervane"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "async-stream",
@@ -3207,6 +3216,7 @@ dependencies = [
  "minijinja-autoreload",
  "minijinja-embed",
  "moka",
+ "ordermap",
  "rand",
  "reqwest",
  "scraper",

@@ -1,6 +1,7 @@
 pub mod context;
 pub mod handle_did;
 pub mod handle_did_stream;
+pub mod handle_guide;
 pub mod handle_index;
 pub mod handle_validate;
 pub mod server;

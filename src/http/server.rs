@@ -16,7 +16,7 @@ use tower_http::{cors::CorsLayer, services::ServeDir};
 
 use crate::http::{
     context::WebContext, handle_did::handle_did, handle_did_stream::handle_did_stream,
-    handle_index::handle_index, handle_validate::handle_validate,
+    handle_guide::handle_guide, handle_index::handle_index, handle_validate::handle_validate,
 };
 
 pub fn build_router(web_context: WebContext) -> Router {
@@ -24,6 +24,7 @@ pub fn build_router(web_context: WebContext) -> Router {
 
     Router::new()
         .route("/", get(handle_index))
+        .route("/guide", get(handle_guide))
         .route("/validate", post(handle_validate))
         .route("/did/:did", get(handle_did))
         .route("/did/:did/updates", get(handle_did_stream))
