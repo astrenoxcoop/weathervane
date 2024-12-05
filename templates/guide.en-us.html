@@ -24,7 +24,7 @@ _atproto.ngerakines.me. 2718    IN      TXT     "did=did:plc:cbkjy5n7bk3ax2wplmt
     <p>Domains can be verified but this is different than the formal relationship of a handle identity</p>
     <p>Example: <kbd>dns:ngerakines.me.</kbd></p>
 
-    <p>To add a domain, add the <a href="https://en.wikipedia.org/wiki/Fully_qualified_domain_name">fully qualified domain name</a> to the <kbd>alsoKnownAs</kbd> array in your DID document with the prefix <code>dns:</code>.</p>
+    <p>To add a domain, add the domain to the <kbd>alsoKnownAs</kbd> array in your DID document with the prefix <code>dns:</code>.</p>
     <p>Additionally, you must create a TXT DNS with the value of <kbd>"did=" + DID</kbd>.</p>
 
     <pre><code>$ dig ngerakines.me TXT +noall +answer
