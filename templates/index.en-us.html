@@ -47,6 +47,10 @@ _atproto.ngerakines.me. 2718    IN      TXT     "did=did:plc:cbkjy5n7bk3ax2wplmt
     <pre><code>$ dig ngerakines.me TXT +noall +answer
 ngerakines.me. 2718    IN      TXT     "did=did:plc:cbkjy5n7bk3ax2wplmtjofq2"</code></pre>
 
+    <h2>DID</h2>
+    <p>Alternate accounts can be verified by having the documents for both DIDs reference each other in the <kbd>alsoKnownAs</kbd> array. This DID <b>must</b> be bare, i.e. without an <kbd>at://</kbd> prefix.</p>
+    <p>Example: <kbd>did:plc:cbkjy5n7bk3ax2wplmtjofq2</kbd></p>
+
     <h2>GitHub</h2>
     <p>GitHub identities can be verified through a multi-step verification process that inolves retreiving the "social identities" through the GitHub API and resolving the handle to your DID.</p>
     <p>Example: <kbd>https://github.com/ngerakines</kbd></p>
