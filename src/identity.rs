@@ -50,6 +50,8 @@ pub(crate) fn parse_identity(value: &str) -> IdentityType {
         IdentityType::DIDMethodWeb(value.to_string())
     } else if value.starts_with("at://") {
         IdentityType::Handle(value.to_string())
+    } else if value.strip_prefix("dns:").is_some_and(is_valid_hostname) {
+        IdentityType::Domain(value.to_string())
     } else if value.starts_with("https://github.com/") {
         let first = value.strip_prefix("https://github.com/").map(|trimmed| {
             if let Some((first, _)) = trimmed.split_once("/") {
@@ -65,8 +67,6 @@ pub(crate) fn parse_identity(value: &str) -> IdentityType {
         }
     } else if value.starts_with("https://") || value.starts_with("http://") {
         IdentityType::Website(value.to_string())
-    } else if value.strip_suffix(".").is_some_and(is_valid_hostname) {
-        IdentityType::Domain(value.to_string())
     } else {
         IdentityType::Unsupported(value.to_string())
     }

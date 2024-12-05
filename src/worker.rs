@@ -142,11 +142,9 @@ pub(crate) mod domain {
 
     pub(crate) async fn validate(did: &str, identity_value: &str) -> VerifyResult {
         tracing::info!(handle = identity_value, did = did, "processing domain");
-        let trimmed = identity_value.strip_suffix(".");
-        if trimmed.is_none() {
-            return VerifyResult::NotFound;
-        }
-        let trimmed = trimmed.unwrap();
+        let trimmed = identity_value
+            .strip_prefix("dns:")
+            .unwrap_or(identity_value);
         if let Ok(found_did) = resolve_handle_dns(trimmed).await {
             tracing::info!(did = found_did, "did resolved");
             if found_did == did {
