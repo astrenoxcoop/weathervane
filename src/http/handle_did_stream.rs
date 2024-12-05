@@ -1,6 +1,6 @@
 use std::{convert::Infallible, time::Duration};
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use axum::{
     extract::{Path, State},
     response::sse::{Event, KeepAlive, Sse},
@@ -13,12 +13,10 @@ use minijinja::context as template_context;
 use tokio::sync::mpsc;
 
 use crate::{
-    did_plc::plc_query,
-    did_web::web_query,
+    cache::did_document_cached,
     errors::WeatherVaneError,
     http::context::{AppEngine, WebContext},
     identity::parse_identities,
-    resolve::{parse_input, InputType},
     worker::{QueueWork, VerifyWork},
 };
 
@@ -26,12 +24,13 @@ pub(crate) async fn handle_did_stream(
     State(web_context): State<WebContext>,
     Path(did_slug): Path<String>,
 ) -> Result<impl IntoResponse, WeatherVaneError> {
-    let query_results = match parse_input(&did_slug) {
-        Ok(InputType::Plc(did)) => plc_query(&web_context.http_client, "plc.directory", &did).await,
-        Ok(InputType::Web(did)) => web_query(&web_context.http_client, &did).await,
-        Err(err) => Err(err),
-        _ => Err(anyhow!("Invalid DID")),
-    };
+    let query_results = did_document_cached(
+        web_context.did_document_cache.clone(),
+        &web_context.http_client,
+        &web_context.plc_hostname,
+        &did_slug,
+    )
+    .await;
 
     if let Err(err) = query_results {
         return Ok(RenderHtml(
@@ -46,18 +45,14 @@ pub(crate) async fn handle_did_stream(
     let (did, identities) = query_results.unwrap();
     let parsed_identities = parse_identities(&identities);
 
-    // Nick: Hard cap at 10 identities to prevent abuse. This could probably be a config option.
-    let mut identities = Vec::from_iter(parsed_identities);
-    identities.truncate(10);
-
-    let (tx, rx) = mpsc::channel::<VerifyWork>(identities.len() + 1);
+    let (tx, rx) = mpsc::channel::<VerifyWork>(parsed_identities.len() + 1);
 
     web_context
         .verify_work_tx
         .send(QueueWork {
             did,
             tx,
-            identities,
+            identities: Vec::from_iter(parsed_identities),
         })
         .await?;
 

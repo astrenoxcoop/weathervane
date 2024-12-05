@@ -5,6 +5,7 @@ use tokio::signal;
 use tokio_util::{sync::CancellationToken, task::TaskTracker};
 use tracing_subscriber::prelude::*;
 use weathervane::{
+    cache::{new_did_document_cache, new_resolve_handle_cache},
     http::{
         context::{AppEngine, WebContext},
         server::build_router,
@@ -57,11 +58,17 @@ async fn main() -> Result<()> {
 
     let (verify_work_tx, mut verify_work_rx) = tokio::sync::mpsc::channel::<QueueWork>(100);
 
+    let resolve_handle_cache = new_resolve_handle_cache();
+    let did_document_cache = new_did_document_cache();
+
     let web_context = WebContext::new(
         config.external_base.as_str(),
         AppEngine::from(jinja),
         &http_client,
         verify_work_tx,
+        resolve_handle_cache,
+        did_document_cache,
+        config.plc_hostname.clone(),
     );
 
     let app = build_router(web_context.clone());

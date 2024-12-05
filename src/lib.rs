@@ -1,3 +1,4 @@
+pub mod cache;
 pub mod config;
 pub mod did;
 pub mod did_plc;

@@ -11,5 +11,13 @@ pub(crate) async fn plc_query(
 
     let resolved_did: ResolveDid = http_client.get(url).send().await?.json().await?;
 
-    Ok((resolved_did.id, resolved_did.also_known_as))
+    Ok((
+        resolved_did.id,
+        resolved_did
+            .also_known_as
+            .iter()
+            .take(25)
+            .cloned()
+            .collect(),
+    ))
 }

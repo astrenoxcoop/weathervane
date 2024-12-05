@@ -29,5 +29,22 @@ pub(crate) async fn web_query(
 
     let resolved_did: ResolveDid = http_client.get(url).send().await?.json().await?;
 
-    Ok((resolved_did.id, resolved_did.also_known_as))
+    Ok((
+        resolved_did.id,
+        resolved_did
+            .also_known_as
+            .iter()
+            .take(25)
+            .cloned()
+            .collect(),
+    ))
+}
+
+pub(crate) async fn web_query_simple(
+    http_client: &reqwest::Client,
+    hostname: &str,
+) -> Result<String> {
+    let url = format!("https://{}/.well-known/did.json", hostname);
+    let resolved_did: ResolveDid = http_client.get(url).send().await?.json().await?;
+    Ok(resolved_did.id)
 }

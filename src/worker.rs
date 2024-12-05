@@ -1,10 +1,12 @@
 use anyhow::Result;
-use moka::{future::Cache, Expiry};
-use std::time::{Duration, Instant};
+use moka::future::Cache;
 use tokio::sync::mpsc::Receiver;
 use tokio_util::sync::CancellationToken;
 
-use crate::identity::IdentityType;
+use crate::{
+    cache::{new_worker_cache, VerifyResult},
+    identity::IdentityType,
+};
 
 pub struct QueueWork {
     pub(crate) did: String,
@@ -17,29 +19,6 @@ pub(crate) enum VerifyWork {
     Ok(IdentityType),
     Error(IdentityType, String),
     Done(),
-}
-
-struct VerifyWorkExpiry;
-
-impl Expiry<String, VerifyResult> for VerifyWorkExpiry {
-    fn expire_after_create(
-        &self,
-        _key: &String,
-        value: &VerifyResult,
-        _current_time: Instant,
-    ) -> Option<Duration> {
-        match value {
-            // Nick: I made these expiration values up.
-            VerifyResult::Found => Some(Duration::from_secs(60 * 10)),
-            VerifyResult::NotFound => Some(Duration::from_secs(60 * 60)),
-        }
-    }
-}
-
-#[derive(Clone, PartialEq, Eq)]
-pub(crate) enum VerifyResult {
-    Found,
-    NotFound,
 }
 
 pub struct VerifyTask {
@@ -56,11 +35,7 @@ impl VerifyTask {
         plc_hostname: String,
         cancellation_token: CancellationToken,
     ) -> Self {
-        let expiry = VerifyWorkExpiry;
-        let cache = Cache::builder()
-            .max_capacity(256)
-            .expire_after(expiry)
-            .build();
+        let cache = new_worker_cache();
         Self {
             http_client: http_client.clone(),
             cancellation_token,

@@ -1,11 +1,13 @@
 use anyhow::{anyhow, Result};
-use futures_util::future::join;
+use futures_util::future::join3;
 use hickory_resolver::{
     config::{ResolverConfig, ResolverOpts},
     AsyncResolver,
 };
 use std::collections::HashSet;
 use std::time::Duration;
+
+use crate::did_web::web_query_simple;
 
 pub(crate) enum InputType {
     Handle(String),
@@ -58,14 +60,34 @@ pub async fn resolve_handle_http(http_client: &reqwest::Client, handle: &str) ->
         })
 }
 
+pub async fn resolve_did_web(http_client: &reqwest::Client, handle: &str) -> Result<String> {
+    let lookup_url = format!("https://{}/.well-known/atproto-did", handle);
+
+    http_client
+        .get(lookup_url.clone())
+        .timeout(Duration::from_secs(10))
+        .send()
+        .await?
+        .text()
+        .await
+        .map_err(|err| err.into())
+        .and_then(|body| {
+            if body.starts_with("did:") {
+                Ok(body.trim().to_string())
+            } else {
+                Err(anyhow!("Invalid response from {}", lookup_url))
+            }
+        })
+}
+
 pub(crate) fn parse_input(input: &str) -> Result<InputType> {
     let trimmed = {
-        if let Some(value) = input.strip_prefix("at://") {
+        if let Some(value) = input.trim().strip_prefix("at://") {
             value
-        } else if let Some(value) = input.strip_prefix('@') {
+        } else if let Some(value) = input.trim().strip_prefix('@') {
             value
         } else {
-            input
+            input.trim()
         }
     };
     if trimmed.is_empty() {
@@ -82,36 +104,38 @@ pub(crate) fn parse_input(input: &str) -> Result<InputType> {
 
 pub async fn resolve_handle(http_client: &reqwest::Client, handle: &str) -> Result<String> {
     let trimmed = {
-        if let Some(value) = handle.strip_prefix("at://") {
+        if let Some(value) = handle.trim().strip_prefix("at://") {
             value
-        } else if let Some(value) = handle.strip_prefix('@') {
+        } else if let Some(value) = handle.trim().strip_prefix('@') {
             value
         } else {
-            handle
+            handle.trim()
         }
     };
 
-    let (dns_lookup, http_lookup) = join(
+    let (dns_lookup, http_lookup, did_web_lookup) = join3(
         resolve_handle_dns(&format!("_atproto.{}", trimmed)),
         resolve_handle_http(http_client, trimmed),
+        web_query_simple(http_client, trimmed),
     )
     .await;
 
-    match (dns_lookup, http_lookup) {
-        (Ok(dns_did), Err(_)) => Ok(dns_did),
-        (Err(_), Ok(http_did)) => Ok(http_did),
-        (Ok(dns_did), Ok(http_did)) => {
-            if dns_did == http_did {
-                Ok(dns_did)
-            } else {
-                Err(anyhow!(
-                    "DNS and HTTP lookups do not match for handle {}",
-                    handle
-                ))
-            }
-        }
-        _ => Err(anyhow!("Failed to resolve handle {}", handle)),
+    let results = vec![dns_lookup, http_lookup, did_web_lookup]
+        .into_iter()
+        .filter_map(|result| result.ok())
+        .collect::<Vec<String>>();
+    if results.is_empty() {
+        return Err(anyhow!("Failed to resolve handle {}", handle));
     }
+
+    let first = results[0].clone();
+    if results.iter().all(|result| result == &first) {
+        return Ok(first);
+    }
+    Err(anyhow!(
+        "Resolving handle returns values that do not match: {}",
+        handle
+    ))
 }
 
 pub async fn resolve_subject(http_client: &reqwest::Client, subject: &str) -> Result<String> {

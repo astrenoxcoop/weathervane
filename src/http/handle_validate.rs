@@ -5,7 +5,7 @@ use axum_template::RenderHtml;
 use http::StatusCode;
 use minijinja::context as template_context;
 
-use crate::{errors::WeatherVaneError, http::context::WebContext, resolve::resolve_subject};
+use crate::{cache::resolve_subject_cached, errors::WeatherVaneError, http::context::WebContext};
 
 #[derive(serde::Deserialize)]
 pub(crate) struct ValidateForm {
@@ -28,7 +28,12 @@ pub(crate) async fn handle_validate(
         .into_response());
     }
 
-    let resolved_did = resolve_subject(&web_context.http_client, &web_form.subject).await;
+    let resolved_did = resolve_subject_cached(
+        web_context.resolve_handle_cache.clone(),
+        &web_context.http_client,
+        &web_form.subject,
+    )
+    .await;
     if let Err(err) = resolved_did {
         return Ok(RenderHtml(
             "partial_validate.en-us.html",

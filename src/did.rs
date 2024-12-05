@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct ResolveDid {
     pub(crate) id: String,

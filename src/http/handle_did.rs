@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use axum::{
     extract::{Path, State},
     response::IntoResponse,
@@ -8,12 +8,10 @@ use axum_template::RenderHtml;
 use minijinja::context as template_context;
 
 use crate::{
-    did_plc::plc_query,
-    did_web::web_query,
+    cache::did_document_cached,
     errors::WeatherVaneError,
     http::{context::WebContext, view_identity::IdentityView},
     identity::parse_identities,
-    resolve::{parse_input, InputType},
 };
 
 pub(crate) async fn handle_did(
@@ -21,12 +19,13 @@ pub(crate) async fn handle_did(
     HxRequest(hx_request): HxRequest,
     Path(did_slug): Path<String>,
 ) -> Result<impl IntoResponse, WeatherVaneError> {
-    let query_results = match parse_input(&did_slug) {
-        Ok(InputType::Plc(did)) => plc_query(&web_context.http_client, "plc.directory", &did).await,
-        Ok(InputType::Web(did)) => web_query(&web_context.http_client, &did).await,
-        Err(err) => Err(err),
-        _ => Err(anyhow!("Invalid DID")),
-    };
+    let query_results = did_document_cached(
+        web_context.did_document_cache.clone(),
+        &web_context.http_client,
+        &web_context.plc_hostname,
+        &did_slug,
+    )
+    .await;
 
     if let Err(err) = query_results {
         return Ok(RenderHtml(
